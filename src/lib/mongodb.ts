@@ -10,9 +10,7 @@ declare global {
   var mongoose: MongooseCache | undefined;
 }
 
-const MONGODB_URI = process.env.MONGODB_URI;
-
-if (!MONGODB_URI) {
+if (!process.env.MONGODB_URI) {
   throw new Error('MONGODB_URI environment variable is not defined. Please set it in your .env file.');
 }
 
@@ -22,7 +20,7 @@ if (!global.mongoose) {
   global.mongoose = cached;
 }
 
-async function connectDB(): Promise<typeof mongoose> {
+export async function connectToDatabase(): Promise<typeof mongoose> {
   if (cached.conn) {
     return cached.conn;
   }
@@ -30,20 +28,24 @@ async function connectDB(): Promise<typeof mongoose> {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      serverSelectionTimeoutMS: 5000, // Timeout after 5 seconds
+      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+      family: 4, // Use IPv4, skip trying IPv6
     };
 
-    // We know MONGODB_URI is defined here because we checked above
-    cached.promise = mongoose.connect(MONGODB_URI as string, opts);
+    cached.promise = mongoose.connect(process.env.MONGODB_URI as string, opts);
   }
 
   try {
     cached.conn = await cached.promise;
+    console.log('Successfully connected to MongoDB');
+    return cached.conn;
   } catch (e) {
     cached.promise = null;
+    console.error('MongoDB connection error:', e);
     throw e;
   }
-
-  return cached.conn;
 }
 
-export default connectDB; 
+// For backwards compatibility
+export default connectToDatabase; 
