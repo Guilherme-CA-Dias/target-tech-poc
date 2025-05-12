@@ -26,6 +26,17 @@ export function IntegrationList() {
     }
   }
 
+  const handleConfigure = async (integration: IntegrationAppIntegration) => {
+    if (!integration.connection?.id) return
+    try {
+      await integrationApp
+        .integration(integration.key)
+        .open()
+    } catch (error) {
+      console.error("Failed to open configuration:", error)
+    }
+  }
+
   return (
     <ul className="space-y-4 mt-8">
       {integrations.map((integration) => (
@@ -52,20 +63,30 @@ export function IntegrationList() {
               {integration.name}
             </h3>
           </div>
-          <button
-            onClick={() =>
-              integration.connection
-                ? handleDisconnect(integration)
-                : handleConnect(integration)
-            }
-            className={`px-4 py-2 rounded-md font-medium transition-colors ${
-              integration.connection
-                ? "bg-red-100 text-red-700 dark:bg-red-700 dark:text-red-100 hover:bg-red-200 hover:text-red-800 dark:hover:bg-red-800 dark:hover:text-red-100"
-                : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-700 dark:hover:text-blue-100"
-            }`}
-          >
-            {integration.connection ? "Disconnect" : "Connect"}
-          </button>
+          <div className="flex items-center space-x-2">
+            {integration.connection && (
+              <button
+                onClick={() => handleConfigure(integration)}
+                className="px-4 py-2 rounded-md font-medium transition-colors bg-blue-100 text-blue-700 dark:bg-blue-700 dark:text-blue-100 hover:bg-blue-200 hover:text-blue-800 dark:hover:bg-blue-800 dark:hover:text-blue-100"
+              >
+                Configure
+              </button>
+            )}
+            <button
+              onClick={() =>
+                integration.connection
+                  ? handleDisconnect(integration)
+                  : handleConnect(integration)
+              }
+              className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                integration.connection
+                  ? "bg-red-100 text-red-700 dark:bg-red-700 dark:text-red-100 hover:bg-red-200 hover:text-red-800 dark:hover:bg-red-800 dark:hover:text-red-100"
+                  : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-blue-100 hover:text-blue-700 dark:hover:bg-blue-700 dark:hover:text-blue-100"
+              }`}
+            >
+              {integration.connection ? "Disconnect" : "Connect"}
+            </button>
+          </div>
         </li>
       ))}
     </ul>

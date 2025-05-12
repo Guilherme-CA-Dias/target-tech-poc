@@ -3,15 +3,17 @@
 import { RecordsTable } from "./components/records-table"
 import { useRecords } from "@/hooks/use-records"
 import { Button } from "@/components/ui/button"
-import { RefreshCw, Loader2, Search } from "lucide-react"
+import { RefreshCw, Loader2, Search, Settings } from "lucide-react"
 import { useState } from "react"
 import { Select } from "@/components/ui/select"
 import { RecordActionKey, RECORD_ACTIONS } from "@/lib/constants"
 import { Input } from "@/components/ui/input"
+import { useIntegrationConfig } from "@/hooks/use-integration-config"
 
 export default function RecordsPage() {
   const [selectedAction, setSelectedAction] = useState<RecordActionKey | ''>('');
   const [searchQuery, setSearchQuery] = useState('');
+  const { openFieldMappings } = useIntegrationConfig()
   const { records, isLoading, hasMore, loadMore, importRecords, isImporting } = useRecords(
     selectedAction || null,
     searchQuery
@@ -28,13 +30,13 @@ export default function RecordsPage() {
       </div>
 
       {/* Record Type Selection and Search */}
-      <div className="grid gap-6 md:grid-cols-[2fr,2fr,auto]">
+      <div className="grid gap-4 md:grid-cols-[1.5fr,1.5fr,auto,auto] items-center">
         <Select
           value={selectedAction}
           onChange={(e) => setSelectedAction(e.target.value as RecordActionKey)}
           className="w-full"
         >
-          <option value="">Select record type</option>
+          <option value="">Select type</option>
           {RECORD_ACTIONS.map((action) => (
             <option key={action.key} value={action.key}>
               {action.name}
@@ -43,18 +45,30 @@ export default function RecordsPage() {
         </Select>
 
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+          <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
           <Input
-            placeholder="Search records..."
-            className="pl-10"
+            placeholder="Search..."
+            className="pl-8"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
         <Button 
+          onClick={() => selectedAction && openFieldMappings(selectedAction)}
+          disabled={!selectedAction}
+          variant="secondary"
+          className="h-10 whitespace-nowrap"
+        >
+          <Settings className="mr-2 h-4 w-4" />
+          Field Mappings
+        </Button>
+
+        <Button 
           onClick={() => importRecords()} 
           disabled={!selectedAction || isImporting}
+          variant="default"
+          className="h-10 whitespace-nowrap"
         >
           {isImporting ? (
             <>
