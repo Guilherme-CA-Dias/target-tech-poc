@@ -15,6 +15,36 @@ interface RecordsTableProps {
   onUpdateRecord: (record: Record) => Promise<void>
 }
 
+function getDisplayableFields(record: Record): { [key: string]: string } {
+  const displayableFields: { [key: string]: string } = {}
+  
+  // Get string fields from top level
+  Object.entries(record).forEach(([key, value]) => {
+    if (
+      typeof value === 'string' && 
+      !key.startsWith('_') && 
+      !['createdAt', 'updatedAt', 'created_at', 'updated_at', '__v', 'uri', 'recordType'].includes(key)
+    ) {
+      displayableFields[key] = value
+    }
+  })
+
+  // Get string fields from nested fields object
+  if (record.fields) {
+    Object.entries(record.fields).forEach(([key, value]) => {
+      if (
+        typeof value === 'string' &&
+        !key.startsWith('_') &&
+        key !== 'id' // Exclude id from fields since we have it at top level
+      ) {
+        displayableFields[key] = value
+      }
+    })
+  }
+
+  return displayableFields
+}
+
 export function RecordsTable({
   records,
   isLoading = false,
@@ -100,32 +130,41 @@ export function RecordsTable({
               No records found
             </div>
           ) : (
-            records.map((record) => (
-              <div
-                key={`${record.id}-${record.customerId}`}
-                className="rounded-xl bg-sky-100/60 p-4 shadow-sm hover:shadow-md transition-shadow group relative"
-              >
-                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => {
-                      setSelectedRecord(record)
-                      setIsEditModalOpen(true)
-                    }}
-                    className="p-1.5 rounded-full bg-white/50 hover:bg-white/80 transition-colors"
-                  >
-                    <Pen className="h-4 w-4 text-gray-600" />
-                  </button>
+            records.map((record) => {
+              const displayFields = getDisplayableFields(record)
+              
+              return (
+                <div
+                  key={`${record.id}-${record.customerId}`}
+                  className="rounded-xl bg-sky-100/60 p-4 shadow-sm hover:shadow-md transition-shadow group relative"
+                >
+                  <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => {
+                        setSelectedRecord(record)
+                        setIsEditModalOpen(true)
+                      }}
+                      className="p-1.5 rounded-full bg-white/50 hover:bg-white/80 transition-colors"
+                    >
+                      <Pen className="h-4 w-4 text-gray-600" />
+                    </button>
+                  </div>
+                  <div className="mb-3">
+                    <h3 className="text-lg font-semibold text-gray-900 leading-tight">
+                      ID: {record.id}
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {Object.entries(displayFields).map(([key, value]) => (
+                      <div key={key} className="flex flex-col gap-0.5">
+                        <span className="text-sm text-gray-500 capitalize">{key}</span>
+                        <span className="text-sm leading-tight">{value}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="mb-3">
-                  <h3 className="text-lg font-semibold text-gray-900 leading-tight">
-                    ID: {record.id}
-                  </h3>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {renderRecordFields(record)}
-                </div>
-              </div>
-            ))
+              )
+            })
           )}
           {hasMore && !isLoading && (
             <div className="py-3 text-center">

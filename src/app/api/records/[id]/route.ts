@@ -2,9 +2,15 @@ import { NextResponse } from 'next/server'
 import { Record } from '@/models/record'
 import mongoose from 'mongoose'
 
+interface RouteParams {
+  params: {
+    id: string
+  }
+}
+
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: RouteParams
 ) {
   try {
     // Ensure MongoDB connection
@@ -12,8 +18,22 @@ export async function GET(
       await mongoose.connect(process.env.MONGODB_URI!)
     }
 
-    // Find record using Mongoose model
-    const record = await Record.findOne({ id: params.id })
+    // Get and validate params
+    const { params } = context
+    const id = await params.id
+
+    // Validate id parameter
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Record ID is required' },
+        { status: 400 }
+      )
+    }
+
+    // Find record using Mongoose model with proper type casting
+    const record = await Record.findOne({ 
+      id: id.toString() 
+    })
 
     if (!record) {
       return NextResponse.json(

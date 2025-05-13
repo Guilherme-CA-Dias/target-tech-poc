@@ -7,12 +7,13 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { useFieldSchema } from "@/hooks/use-field-schema"
 import { Record } from "@/types/record"
 import { Loader2 } from "lucide-react"
 import { useRecord } from '@/hooks/use-record'
+import { DataInput } from "@integration-app/react"
+import { sendToWebhook } from '@/lib/webhook-utils'
+import { ensureAuth } from "@/lib/auth"
 
 interface EditRecordModalProps {
   record: Record | null
@@ -20,6 +21,13 @@ interface EditRecordModalProps {
   isOpen: boolean
   onClose: () => void
   onSave: (updatedRecord: Record) => Promise<void>
+}
+
+interface FieldChange {
+  fieldName: string
+  oldValue: any
+  newValue: any
+  timestamp: string
 }
 
 export function EditRecordModal({
@@ -31,22 +39,75 @@ export function EditRecordModal({
 }: EditRecordModalProps) {
   const [formData, setFormData] = useState<Record | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [fieldChanges, setFieldChanges] = useState<FieldChange[]>([])
   const { schema, isLoading: schemaLoading, error: schemaError } = useFieldSchema(recordType)
   const { record, isLoading: recordLoading, error: recordError } = useRecord(initialRecord?.id ?? null)
+  const [recordId, setRecordId] = useState<string | null>(null)
 
   useEffect(() => {
     if (record) {
       setFormData(record)
+      setRecordId(record.id)
     }
   }, [record])
 
+  const handleFieldChange = (value: unknown) => {
+    if (!formData?.fields) return
+
+    const newFields = value as { [key: string]: any }
+    
+    // Compare old and new values to track changes
+    Object.entries(newFields).forEach(([fieldName, newValue]) => {
+      const oldValue = formData.fields?.[fieldName]
+      if (JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
+        setFieldChanges(prev => [...prev, {
+          fieldName,
+          oldValue,
+          newValue,
+          timestamp: new Date().toISOString()
+        }])
+      }
+    })
+
+    setFormData({
+      ...formData,
+      fields: newFields
+    })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData) return
+    
+    if (!formData?.fields || !fieldChanges.length || !formData.id) return
 
     setIsSaving(true)
     try {
+      const webhookPayload = {
+        type: 'updated' as const,
+        data: {
+          id: formData.id,
+          ...formData.fields,
+          updatedTime: new Date().toISOString(),
+        },
+        customerId: ensureAuth().customerId || '',
+      }
+      
+      const { id: _, ...fieldsWithoutId } = formData.fields
+      
+      const finalPayload = {
+        ...webhookPayload,
+        data: {
+          id: formData.id,
+          ...fieldsWithoutId,
+          updatedTime: new Date().toISOString(),
+        }
+      }
+      
+      console.log('Final Webhook Payload:', finalPayload)
+      await sendToWebhook(finalPayload)
+
       await onSave(formData)
+      setFieldChanges([])
       onClose()
     } catch (error) {
       console.error('Failed to save record:', error)
@@ -55,35 +116,18 @@ export function EditRecordModal({
     }
   }
 
-  const handleFieldChange = (fieldName: string, value: string) => {
-    if (!formData) return
+  const modifiedSchema = schema ? {
+    ...schema,
+    properties: Object.entries(schema.properties).reduce((acc, [key, value]) => {
+      if (key === 'id') return acc
+      return { ...acc, [key]: value }
+    }, {})
+  } : null
 
-    let parsedValue = value
-    // Try to parse the value as JSON if it looks like a JSON string
-    if (value.trim().startsWith('{') || value.trim().startsWith('[')) {
-      try {
-        JSON.parse(value)
-        parsedValue = value // Keep it as string if it's valid JSON
-      } catch {
-        // If it's not valid JSON, keep the original value
-        parsedValue = value
-      }
-    }
-
-    setFormData({
-      ...formData,
-      fields: {
-        ...formData.fields,
-        [fieldName]: parsedValue
-      }
-    })
-  }
-
-  const getFieldValue = (fieldName: string, value: any): string => {
-    if (value === null || value === undefined) return ''
-    if (typeof value === 'object') return JSON.stringify(value)
-    return String(value)
-  }
+  const filteredFormData = formData?.fields ? {
+    ...formData.fields,
+    id: undefined
+  } : null
 
   if (schemaError || recordError) {
     return (
@@ -102,9 +146,11 @@ export function EditRecordModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[900px]">
-        <DialogHeader>
-          <DialogTitle>Edit Record</DialogTitle>
+      <DialogContent className="sm:max-w-[900px] max-h-[80vh] overflow-y-auto">
+        <DialogHeader className="flex flex-row items-center justify-between">
+          <div className="flex items-center gap-2">
+            <DialogTitle>Edit Record - ID: {formData?.id}</DialogTitle>
+          </div>
         </DialogHeader>
         {(schemaLoading || recordLoading) ? (
           <div className="flex items-center justify-center py-8">
@@ -112,29 +158,16 @@ export function EditRecordModal({
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-4">
-              {schema && formData?.fields && Object.entries(schema.properties).map(([fieldName, fieldSchema]) => {
-                if (['id', '_id', '__v', 'customerId'].includes(fieldName)) return null
-
-                return (
-                  <div key={fieldName} className="flex flex-col gap-2">
-                    <Label htmlFor={fieldName} className="text-sm text-gray-500">
-                      {fieldSchema.title}
-                    </Label>
-                    <Input
-                      id={fieldName}
-                      type={fieldSchema.type === 'number' ? 'number' : 'text'}
-                      value={getFieldValue(fieldName, formData.fields[fieldName])}
-                      onChange={(e) => handleFieldChange(fieldName, e.target.value)}
-                      className="w-full"
-                      placeholder={fieldSchema.description}
-                      disabled={fieldSchema.type === 'readonly'}
-                    />
-                  </div>
-                )
-              })}
+            <div className="py-4">
+              {modifiedSchema && filteredFormData && (
+                <DataInput
+                  schema={modifiedSchema}
+                  value={filteredFormData}
+                  onChange={handleFieldChange}
+                />
+              )}
             </div>
-            <DialogFooter className="mt-6">
+            <DialogFooter className="mt-6 border-t pt-4">
               <Button 
                 type="button" 
                 variant="outline" 
