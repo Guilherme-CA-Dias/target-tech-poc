@@ -9,6 +9,7 @@ import { Select } from "@/components/ui/select"
 import { RecordActionKey, RECORD_ACTIONS } from "@/lib/constants"
 import { Input } from "@/components/ui/input"
 import { useIntegrationConfig } from "@/hooks/use-integration-config"
+import { Record } from "@/types/record"
 
 export default function RecordsPage() {
   const [selectedAction, setSelectedAction] = useState<RecordActionKey | ''>('');
@@ -18,6 +19,10 @@ export default function RecordsPage() {
     selectedAction || null,
     searchQuery
   );
+
+  const handleUpdateRecord = async (updatedRecord: Record) => {
+    console.log('Updating record:', updatedRecord)
+  }
 
   return (
     <div className="container mx-auto py-10 space-y-6">
@@ -89,6 +94,8 @@ export default function RecordsPage() {
           isLoading={isLoading}
           hasMore={hasMore}
           onLoadMore={loadMore}
+          recordType={selectedAction}
+          onUpdateRecord={handleUpdateRecord}
         />
       </div>
     </div>

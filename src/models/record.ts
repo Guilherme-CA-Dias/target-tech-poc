@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 export interface IRecord {
   id: string;
@@ -18,45 +18,29 @@ export interface IRecord {
 // Specify the database name
 const dbName = 'local-deployments';
 
-const recordSchema = new mongoose.Schema<IRecord>(
-  {
-    id: {
-      type: String,
-      required: true,
-    },
-    name: {
-      type: String,
-      required: true,
-    },
-    createdTime: String,
-    updatedTime: String,
-    uri: String,
-    fields: {
-      type: Map,
-      of: mongoose.Schema.Types.Mixed,
-      default: {},
-    },
-    recordType: {
-      type: String,
-      required: true,
-      index: true,
-    },
-    customerId: {
-      type: String,
-      required: true,
-      index: true,
-    },
+const RecordSchema = new Schema({
+  id: String,
+  customerId: String,
+  recordType: String,
+  fields: {
+    type: Map,
+    of: Schema.Types.Mixed
   },
-  {
-    timestamps: true,
-  }
-);
+  createdAt: Date,
+  updatedAt: Date,
+  createdTime: String,
+  updatedTime: String,
+  name: String,
+  uri: String
+}, {
+  timestamps: true
+});
 
 // Compound index for efficient queries
-recordSchema.index({ customerId: 1, recordType: 1 });
+RecordSchema.index({ customerId: 1, recordType: 1 });
 
 // Connect to the specific database
 const connection = mongoose.connection.useDb(dbName);
 
 // This creates a 'records' collection in the local-deployments database
-export const Record = connection.models.Record || connection.model<IRecord>('Record', recordSchema); 
+export const Record = connection.models.Record || connection.model<IRecord>('Record', RecordSchema); 

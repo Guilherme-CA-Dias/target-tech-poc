@@ -2,6 +2,8 @@ import { Record } from "@/types/record"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Pen } from "lucide-react"
+import { EditRecordModal } from "./edit-record-modal"
+import { useState } from "react"
 
 interface RecordsTableProps {
   records: Record[]
@@ -9,6 +11,8 @@ interface RecordsTableProps {
   isError?: Error | null
   onLoadMore?: () => void
   hasMore?: boolean
+  recordType: string | null
+  onUpdateRecord: (record: Record) => Promise<void>
 }
 
 export function RecordsTable({
@@ -16,8 +20,13 @@ export function RecordsTable({
   isLoading = false,
   isError = null,
   onLoadMore,
-  hasMore
+  hasMore,
+  recordType,
+  onUpdateRecord
 }: RecordsTableProps) {
+  const [selectedRecord, setSelectedRecord] = useState<Record | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+
   const formatDate = (dateString?: string) => {
     if (!dateString) return "-";
     try {
@@ -98,7 +107,10 @@ export function RecordsTable({
               >
                 <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
-                    onClick={() => {/* Add your edit function here */}}
+                    onClick={() => {
+                      setSelectedRecord(record)
+                      setIsEditModalOpen(true)
+                    }}
                     className="p-1.5 rounded-full bg-white/50 hover:bg-white/80 transition-colors"
                   >
                     <Pen className="h-4 w-4 text-gray-600" />
@@ -128,6 +140,17 @@ export function RecordsTable({
         </div>
         <ScrollBar orientation="vertical" />
       </ScrollArea>
+
+      <EditRecordModal
+        record={selectedRecord}
+        recordType={recordType}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false)
+          setSelectedRecord(null)
+        }}
+        onSave={onUpdateRecord}
+      />
     </div>
   )
 } 
