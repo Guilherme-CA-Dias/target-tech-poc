@@ -3,35 +3,67 @@
 import { RecordsTable } from "./components/records-table"
 import { useRecords } from "@/hooks/use-records"
 import { Button } from "@/components/ui/button"
-import { RefreshCw, Loader2, Search, Settings } from "lucide-react"
+import { RefreshCw, Loader2, Search, Settings, Plus } from "lucide-react"
 import { useState } from "react"
 import { Select } from "@/components/ui/select"
 import { RecordActionKey, RECORD_ACTIONS } from "@/lib/constants"
 import { Input } from "@/components/ui/input"
 import { useIntegrationConfig } from "@/hooks/use-integration-config"
 import { Record } from "@/types/record"
+import { useRouter } from "next/navigation"
+import { CreateRecordModal } from "./components/create-record-modal"
 
 export default function RecordsPage() {
   const [selectedAction, setSelectedAction] = useState<RecordActionKey | ''>('');
   const [searchQuery, setSearchQuery] = useState('');
   const { openFieldMappings } = useIntegrationConfig()
-  const { records, isLoading, hasMore, loadMore, importRecords, isImporting } = useRecords(
+  const { 
+    records, 
+    isLoading, 
+    hasMore, 
+    loadMore, 
+    importRecords, 
+    isImporting, 
+    isError,
+    setRecords
+  } = useRecords(
     selectedAction || null,
     searchQuery
   );
+  const router = useRouter()
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
   const handleUpdateRecord = async (updatedRecord: Record) => {
     console.log('Updating record:', updatedRecord)
   }
 
+  const handleDeleteRecord = async (record: Record) => {
+    // Update UI optimistically
+    setRecords((prev: Record[]) => prev.filter((r: Record) => r.id !== record.id))
+  }
+
+  const handleCreateRecord = (newRecord: Record) => {
+    records.unshift(newRecord)
+  }
+
   return (
     <div className="container mx-auto py-10 space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Records</h1>
-        <p className="text-muted-foreground mt-2">
-          Select a record type to view and manage your records
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Records</h1>
+          <p className="text-muted-foreground mt-2">
+            Select a record type to view and manage your records
+          </p>
+        </div>
+        <Button
+          onClick={() => setIsCreateModalOpen(true)}
+          disabled={!selectedAction}
+          className="bg-green-100 text-green-700 hover:bg-green-200"
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Create Record
+        </Button>
       </div>
 
       {/* Record Type Selection and Search */}
@@ -92,12 +124,21 @@ export default function RecordsPage() {
         <RecordsTable 
           records={records}
           isLoading={isLoading}
+          isError={isError}
           hasMore={hasMore}
           onLoadMore={loadMore}
           recordType={selectedAction}
           onUpdateRecord={handleUpdateRecord}
+          onDeleteRecord={handleDeleteRecord}
         />
       </div>
+
+      <CreateRecordModal
+        recordType={selectedAction}
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onCreated={handleCreateRecord}
+      />
     </div>
   );
 } 

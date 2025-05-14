@@ -14,6 +14,7 @@ import { useRecord } from '@/hooks/use-record'
 import { DataInput } from "@integration-app/react"
 import { sendToWebhook } from '@/lib/webhook-utils'
 import { ensureAuth } from "@/lib/auth"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 
 interface EditRecordModalProps {
   record: Record | null
@@ -146,7 +147,7 @@ export function EditRecordModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[900px] max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[900px] h-[80vh]">
         <DialogHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
             <DialogTitle>Edit Record - ID: {formData?.id}</DialogTitle>
@@ -157,41 +158,44 @@ export function EditRecordModal({
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
         ) : (
-          <form onSubmit={handleSubmit}>
-            <div className="py-4">
-              {modifiedSchema && filteredFormData && (
-                <DataInput
-                  schema={modifiedSchema}
-                  value={filteredFormData}
-                  onChange={handleFieldChange}
-                />
-              )}
-            </div>
-            <DialogFooter className="mt-6 border-t pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-blue-100 hover:text-red-700 dark:hover:bg-red-700 dark:hover:text-red-100" 
-                onClick={onClose}
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                className="bg-blue-100 text-blue-700 dark:bg-blue-700 dark:text-blue-100 hover:bg-blue-200 hover:text-blue-800 dark:hover:bg-blue-800 dark:hover:text-blue-100"
-                disabled={isSaving}
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  'Save Changes'
+          <ScrollArea className="h-full w-full pr-4">
+            <form onSubmit={handleSubmit}>
+              <div className="py-4">
+                {modifiedSchema && filteredFormData && (
+                  <DataInput
+                    schema={modifiedSchema}
+                    value={filteredFormData}
+                    onChange={handleFieldChange}
+                  />
                 )}
-              </Button>
-            </DialogFooter>
-          </form>
+              </div>
+              <DialogFooter className="mt-6 border-t pt-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-blue-100 hover:text-red-700 dark:hover:bg-red-700 dark:hover:text-red-100" 
+                  onClick={onClose}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="bg-blue-100 text-blue-700 dark:bg-blue-700 dark:text-blue-100 hover:bg-blue-200 hover:text-blue-800 dark:hover:bg-blue-800 dark:hover:text-blue-100"
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Changes'
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+            <ScrollBar orientation="vertical" />
+          </ScrollArea>
         )}
       </DialogContent>
     </Dialog>

@@ -1,18 +1,22 @@
 import { Record } from "@/types/record"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
-import { Pen } from "lucide-react"
+import { Pen, Trash2 } from "lucide-react"
 import { EditRecordModal } from "./edit-record-modal"
 import { useState } from "react"
+import { sendToWebhook } from '@/lib/webhook-utils'
+import { ensureAuth } from "@/lib/auth"
+import { DeleteConfirmationDialog } from "./delete-confirmation-dialog"
 
 interface RecordsTableProps {
   records: Record[]
   isLoading?: boolean
-  isError?: Error | null
+  isError?: boolean
   onLoadMore?: () => void
   hasMore?: boolean
   recordType: string | null
   onUpdateRecord: (record: Record) => Promise<void>
+  onDeleteRecord?: (record: Record) => void
 }
 
 function getDisplayableFields(record: Record): { [key: string]: string } {
@@ -48,14 +52,16 @@ function getDisplayableFields(record: Record): { [key: string]: string } {
 export function RecordsTable({
   records,
   isLoading = false,
-  isError = null,
+  isError = false,
   onLoadMore,
   hasMore,
   recordType,
-  onUpdateRecord
+  onUpdateRecord,
+  onDeleteRecord
 }: RecordsTableProps) {
   const [selectedRecord, setSelectedRecord] = useState<Record | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [recordToDelete, setRecordToDelete] = useState<Record | null>(null)
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return "-";
@@ -103,6 +109,23 @@ export function RecordsTable({
     });
   };
 
+  const handleDelete = async (record: Record) => {
+    try {
+      await sendToWebhook({
+        type: 'deleted',
+        data: {
+          id: record.id,
+          ...record.fields,
+        },
+        customerId: ensureAuth().customerId || '',
+      })
+      
+      onDeleteRecord?.(record)
+    } catch (error) {
+      console.error('Failed to delete record:', error)
+    }
+  }
+
   return (
     <div className="relative">
       <ScrollArea 
@@ -138,7 +161,7 @@ export function RecordsTable({
                   key={`${record.id}-${record.customerId}`}
                   className="rounded-xl bg-sky-100/60 p-4 shadow-sm hover:shadow-md transition-shadow group relative"
                 >
-                  <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                     <button
                       onClick={() => {
                         setSelectedRecord(record)
@@ -147,6 +170,12 @@ export function RecordsTable({
                       className="p-1.5 rounded-full bg-white/50 hover:bg-white/80 transition-colors"
                     >
                       <Pen className="h-4 w-4 text-gray-600" />
+                    </button>
+                    <button
+                      onClick={() => setRecordToDelete(record)}
+                      className="p-1.5 rounded-full bg-white/50 hover:bg-red-100 transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-600" />
                     </button>
                   </div>
                   <div className="mb-3">
@@ -189,6 +218,13 @@ export function RecordsTable({
           setSelectedRecord(null)
         }}
         onSave={onUpdateRecord}
+      />
+
+      <DeleteConfirmationDialog
+        record={recordToDelete}
+        isOpen={!!recordToDelete}
+        onClose={() => setRecordToDelete(null)}
+        onConfirm={handleDelete}
       />
     </div>
   )

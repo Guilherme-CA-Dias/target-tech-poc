@@ -1,10 +1,10 @@
 import useSWR from 'swr';
-import { RecordsResponse } from '@/types/record';
+import { RecordsResponse, Record } from '@/types/record';
 import { authenticatedFetcher } from '@/lib/fetch-utils';
 import { useState, useCallback, useEffect } from 'react';
 
 export function useRecords(actionKey: string | null, search: string = '') {
-  const [allRecords, setAllRecords] = useState([]);
+  const [records, setRecords] = useState<Record[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
 
@@ -15,12 +15,12 @@ export function useRecords(actionKey: string | null, search: string = '') {
 
   // Reset records when action or search changes
   useEffect(() => {
-    setAllRecords([]);
+    setRecords([]);
   }, [actionKey, search]);
 
   useEffect(() => {
     if (data?.records) {
-      setAllRecords(prev => 
+      setRecords(prev => 
         prev.length === 0 ? data.records : [...prev, ...data.records]
       );
     }
@@ -34,14 +34,14 @@ export function useRecords(actionKey: string | null, search: string = '') {
       const nextPage = await authenticatedFetcher(
         `/api/records?action=${actionKey}&cursor=${data.cursor}${search ? `&search=${encodeURIComponent(search)}` : ''}`
       );
-      setAllRecords(prev => [...prev, ...nextPage.records]);
-      await mutate({ ...nextPage, records: [...allRecords, ...nextPage.records] }, false);
+      setRecords(prev => [...prev, ...nextPage.records]);
+      await mutate({ ...nextPage, records: [...records, ...nextPage.records] }, false);
     } catch (error) {
       console.error('Error loading more records:', error);
     } finally {
       setIsLoadingMore(false);
     }
-  }, [data?.cursor, actionKey, isLoadingMore, allRecords, mutate, search]);
+  }, [data?.cursor, actionKey, isLoadingMore, records, mutate, search]);
 
   const importRecords = async () => {
     if (!actionKey || isImporting) return;
@@ -66,7 +66,8 @@ export function useRecords(actionKey: string | null, search: string = '') {
   };
 
   return {
-    records: allRecords,
+    records,
+    setRecords,
     isLoading,
     isError: error,
     hasMore: !!data?.cursor,
