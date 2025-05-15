@@ -1,6 +1,6 @@
 # Integration Use Case Template
 
-This is a template for an application showcasing integration capabilities using [Integration.app](https://integration.app). The app is built with Next.js and demonstrates how to implement user authentication and integration token generation.
+This is a template for an application showcasing integration capabilities using [Integration.app](https://integration.app). The app is built with Next.js and demonstrates how to implement user authentication, integration token generation, and records management.
 
 ## Prerequisites
 
@@ -56,11 +56,11 @@ yarn dev
 ## Project Structure
 
 - `/src/app` - Next.js app router pages and API routes
-  - `/users` - Example implementation of external data import
-  - `/api` - Backend API routes for users and integration token management
+  - `/records` - Records management implementation
+  - `/api` - Backend API routes for records and integration token management
 - `/src/components` - Reusable React components
 - `/src/lib` - Utility functions and helpers
-- `/src/models` - Data models and types
+- `/src/hooks` - Custom React hooks for data fetching and state management
 - `/public` - Static assets
 
 ## Template Features
@@ -71,17 +71,37 @@ The template implements a simple authentication mechanism using a randomly gener
 
 - Identify the user/customer in the integration platform
 - Generate integration tokens for external app connections
-- Associate imported data with specific customers
+- Associate records with specific customers
 
-### Users Example
+### Records Management
 
-The template includes a complete example of importing and managing users from an external application:
+The template includes a complete implementation of records management:
 
-- User data model and TypeScript types
-- API routes for user import and retrieval
-- React components for displaying user data
-- Integration with SWR for efficient data fetching
-- Example of using the Integration.app client for data import
+- Create, read, update, and delete (CRUD) operations for records
+- Integration.app components for form handling:
+  - `DataInput` for dynamic form generation based on schemas
+  - `FloatingPortalBoundary` for proper modal and popover handling
+- Field mapping configuration
+- Webhook integration for real-time updates
+- Infinite scrolling for large record sets
+- Search functionality
+- Record type filtering
+
+### Integration.app Components
+
+The template showcases the usage of various Integration.app React components:
+
+- `DataInput` - Renders form fields based on dynamic schemas
+- `FloatingPortalBoundary` - Handles proper stacking context for modals
+- `useIntegrationApp` - Hook for accessing the Integration.app client
+- `useFieldSchema` - Custom hook for fetching and managing field schemas
+
+### Data Fetching
+
+- SWR for efficient data fetching and caching
+- Optimistic updates for better UX
+- Proper error handling and loading states
+- Infinite scroll implementation for pagination
 
 ## Available Scripts
 
@@ -89,6 +109,15 @@ The template includes a complete example of importing and managing users from an
 - `npm run build` - Build the application for production
 - `npm run start` - Start the production server
 - `npm run lint` - Run ESLint to check code quality
+
+## Best Practices
+
+- TypeScript for type safety
+- React hooks for state management
+- Proper component organization
+- Error boundary implementation
+- Responsive design with Tailwind CSS
+- Accessibility considerations
 
 ## License
 
