@@ -44,7 +44,7 @@ export function useFieldSchema(recordType: string | null) {
         const response = await integrationApp
           .connection(firstConnection.id)
           .fieldMapping(recordType.replace('get-', ''))
-          .get() as FieldMappingResponse
+          .get({ autoCreate: true }) as FieldMappingResponse
 
         if (!response?.appSchema) {
           throw new Error('Invalid schema response')

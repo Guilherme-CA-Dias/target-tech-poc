@@ -22,12 +22,15 @@ interface RecordsTableProps {
 function getDisplayableFields(record: Record): { [key: string]: string } {
   const displayableFields: { [key: string]: string } = {}
   
+  // Add customerId to excluded fields here too
+  const excludedTopLevelFields = ['id', '_id', 'customerId', 'recordType', '__v', 'createdAt', 'updatedAt', 'created_at', 'updated_at', 'uri'];
+  
   // Get string fields from top level
   Object.entries(record).forEach(([key, value]) => {
     if (
       typeof value === 'string' && 
       !key.startsWith('_') && 
-      !['createdAt', 'updatedAt', 'created_at', 'updated_at', '__v', 'uri', 'recordType'].includes(key)
+      !excludedTopLevelFields.includes(key)
     ) {
       displayableFields[key] = value
     }
