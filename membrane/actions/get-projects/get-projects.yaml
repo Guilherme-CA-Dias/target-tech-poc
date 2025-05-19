@@ -1,0 +1,14 @@
+isCustomized: false
+key: get-projects
+state: READY
+errors: []
+isDeactivated: false
+id: 681a4e2eccf678f281402ba0
+name: Get Projects
+type: list-data-records
+config:
+  dataSource:
+    key: projects
+  fieldMapping:
+    key: projects
+isDeployed: false

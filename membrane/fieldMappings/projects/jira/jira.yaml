@@ -1,0 +1,49 @@
+key: projects
+state: READY
+errors: []
+isDeactivated: false
+id: 681a4e3a5f4cb1dd06e1cc8f
+name: Projects
+customized: false
+universalFieldMappingId: 681a4e32333b04d6fb3c5ffe
+integrationId: 681a4e2c5f4cb1dd06e1c6f2
+dataSourceKey: projects
+direction: both
+defaultImportValue:
+  name:
+    $var: $.name
+  description:
+    $var: $.description
+  dueDate:
+    $var: $.dueTime
+importValue:
+  name:
+    $var: $.name
+  description:
+    $var: $.description
+integration:
+  key: jira
+  state: READY
+  errors: []
+  isDeactivated: false
+  id: 681a4e2c5f4cb1dd06e1c6f2
+  name: Jira
+  uuid: dcfbf52a-0e90-4bd4-8d39-aa6f21aa3081
+  connectorId: 64343d08986ed1caad5b3aa7
+  hasDefaultParameters: false
+  hasMissingParameters: false
+  hasDocumentation: true
+  hasOperations: true
+  hasData: true
+  hasEvents: false
+  hasGlobalWebhooks: false
+  hasUdm: true
+  areParametersCustomized: false
+  baseUri: s3://integration-app-connectors/public/9c8c0930-c1fb-4678-ba3e-0f43adce9e9e
+  connectorVersion: 1.4.12
+  logoUri: https://static.integration.app/connectors/jira/logo.png
+  dataCollectionsCount: 12
+  operationsCount: 499
+  eventsCount: 0
+  authType: oauth2
+integrationKey: jira

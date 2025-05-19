@@ -1,0 +1,38 @@
+key: users
+state: READY
+errors: []
+isDeactivated: false
+id: 681a4e3922829f45bd114899
+name: Users
+integrationId: 681a4e2c5f4cb1dd06e1c6f2
+customized: true
+universalDataSourceId: 681a4e31ccf678f281402c64
+collectionKey: users
+udm: users
+defaultPath: /data/users
+integration:
+  key: jira
+  state: READY
+  errors: []
+  isDeactivated: false
+  id: 681a4e2c5f4cb1dd06e1c6f2
+  name: Jira
+  uuid: dcfbf52a-0e90-4bd4-8d39-aa6f21aa3081
+  connectorId: 64343d08986ed1caad5b3aa7
+  hasDefaultParameters: false
+  hasMissingParameters: false
+  hasDocumentation: true
+  hasOperations: true
+  hasData: true
+  hasEvents: false
+  hasGlobalWebhooks: false
+  hasUdm: true
+  areParametersCustomized: false
+  baseUri: s3://integration-app-connectors/public/9c8c0930-c1fb-4678-ba3e-0f43adce9e9e
+  connectorVersion: 1.4.12
+  logoUri: https://static.integration.app/connectors/jira/logo.png
+  dataCollectionsCount: 12
+  operationsCount: 499
+  eventsCount: 0
+  authType: oauth2
+integrationKey: jira

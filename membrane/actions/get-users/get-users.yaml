@@ -1,0 +1,14 @@
+isCustomized: false
+key: get-users
+state: READY
+errors: []
+isDeactivated: false
+id: 681a4e2f0d6a7236439b5a8b
+name: Get Users
+type: list-data-records
+config:
+  dataSource:
+    udm: users
+  fieldMapping:
+    key: users
+isDeployed: false

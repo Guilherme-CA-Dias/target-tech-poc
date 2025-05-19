@@ -1,0 +1,105 @@
+key: project-my-app-to-external-app
+id: 681a4e42ccf678f2814032cb
+name: 'Project: My App => External App'
+isDeactivated: false
+universalFlowId: 681a4e3522829f45bd1147d5
+integrationId: 681a4e2c5f4cb1dd06e1c6f2
+integration:
+  key: jira
+  state: READY
+  errors: []
+  isDeactivated: false
+  id: 681a4e2c5f4cb1dd06e1c6f2
+  name: Jira
+  uuid: dcfbf52a-0e90-4bd4-8d39-aa6f21aa3081
+  connectorId: 64343d08986ed1caad5b3aa7
+  hasDefaultParameters: false
+  hasMissingParameters: false
+  hasDocumentation: true
+  hasOperations: true
+  hasData: true
+  hasEvents: false
+  hasGlobalWebhooks: false
+  hasUdm: true
+  areParametersCustomized: false
+  baseUri: s3://integration-app-connectors/public/9c8c0930-c1fb-4678-ba3e-0f43adce9e9e
+  connectorVersion: 1.4.12
+  logoUri: https://static.integration.app/connectors/jira/logo.png
+  dataCollectionsCount: 12
+  operationsCount: 499
+  eventsCount: 0
+  authType: oauth2
+nodes:
+  app-event-trigger:
+    type: app-event-trigger
+    name: Task Event Trigger
+    config:
+      appEvent:
+        key: task-event
+    links:
+      - key: create-data-record
+        name: Task created
+        filter:
+          $eval:
+            $var: $.output.type
+          is: created
+      - key: delete-data-record
+        name: Task deleted
+        filter:
+          $eval:
+            $var: $.output.type
+          is: deleted
+      - key: update-data-record
+        name: Task updated
+        filter:
+          $eval:
+            $var: $.output.type
+          is: updated
+  create-data-record:
+    type: create-data-record
+    name: Create Task
+    config:
+      dataSource:
+        key: tasks
+      fieldMapping:
+        key: tasks
+        input:
+          $var: $.input.app-event-trigger.data
+    links:
+      - key: save-external-task-id
+  delete-data-record:
+    type: delete-data-record
+    name: Delete Task
+    config:
+      dataSource:
+        key: tasks
+      id:
+        $var: $.input.app-event-trigger.externalTaskId
+      fieldMapping: {}
+    links: []
+  update-data-record:
+    type: update-data-record
+    name: Update Task
+    config:
+      dataSource:
+        key: tasks
+      id:
+        $var: $.input.app-event-trigger.externalTaskId
+      fieldMapping:
+        key: tasks
+        input:
+          $var: $.input.app-event-trigger.data
+    links: []
+  save-external-task-id:
+    type: api-request-to-your-app
+    name: Save External Task Id
+    config:
+      request:
+        body:
+          externalTaskId:
+            $var: $.input.create-data-record.id
+    links: []
+autoCreateInstances: false
+customized: false
+isDeployed: false
+integrationKey: jira

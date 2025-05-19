@@ -1,0 +1,6 @@
+id: 681a4e2d22829f45bd11466f
+key: jira-service-desk
+name: Jira Service Desk
+connectorId: 66f551a666668da02c092211
+baseUri: s3://integration-app-connectors/public/7340043d-66ca-411f-837a-9467e064d975
+connectorVersion: 1.0.1

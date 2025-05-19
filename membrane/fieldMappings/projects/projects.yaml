@@ -1,0 +1,16 @@
+key: projects
+state: READY
+errors: []
+isDeactivated: false
+id: 681a4e32333b04d6fb3c5ffe
+name: Projects
+customized: false
+dataSourceKey: projects
+direction: both
+defaultImportValue:
+  name:
+    $var: $.name
+  description:
+    $var: $.description
+  dueDate:
+    $var: $.dueTime

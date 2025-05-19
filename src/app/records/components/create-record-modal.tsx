@@ -52,6 +52,7 @@ export function CreateRecordModal({
     try {
       await sendToWebhook({
         type: 'created',
+        recordType,
         data: {
           id: tempId,
           ...formData,

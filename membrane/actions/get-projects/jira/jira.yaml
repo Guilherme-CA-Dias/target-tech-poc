@@ -1,0 +1,25 @@
+isCustomized: true
+parentId: 681a4e2eccf678f281402ba0
+integrationId: 681a4e2c5f4cb1dd06e1c6f2
+key: get-projects
+state: READY
+errors: []
+isDeactivated: false
+id: 681a4e3a5f4cb1dd06e1cc85
+name: Get Projects
+type: list-data-records
+inputSchema:
+  type: object
+  properties:
+    cursor:
+      type: string
+config:
+  dataSource:
+    key: projects
+  fieldMapping:
+    key: projects
+    includeRawFields: true
+  cursor:
+    $var: $.input.cursor
+isDeployed: false
+integrationKey: jira

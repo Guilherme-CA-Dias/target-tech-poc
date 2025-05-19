@@ -1,0 +1,46 @@
+key: tasks
+state: READY
+errors: []
+isDeactivated: false
+id: 681a4e33656f7d57d6530b20
+name: Tasks
+customized: false
+dataSourceKey: tasks
+appSchema:
+  type: object
+  properties:
+    id:
+      type: string
+    title:
+      type: string
+    description:
+      type: string
+    assigneeId:
+      type: string
+    projectId:
+      type: string
+    status:
+      type: string
+direction: both
+defaultImportValue:
+  id:
+    $var: $.id
+  title:
+    $var: $.subject
+  description:
+    $var: $.content
+  status:
+    $var: $.status
+  projectId:
+    $var: $.projectId
+  assigneeId:
+    $var: $.assigneeId
+defaultExportValue:
+  subject:
+    $var: $.title
+  content:
+    $var: $.description
+  status:
+    $var: $.status
+  ownerId:
+    $var: $.assigneeId

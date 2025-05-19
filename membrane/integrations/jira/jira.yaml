@@ -1,0 +1,6 @@
+id: 681a4e2c5f4cb1dd06e1c6f2
+key: jira
+name: Jira
+connectorId: 64343d08986ed1caad5b3aa7
+baseUri: s3://integration-app-connectors/public/9c8c0930-c1fb-4678-ba3e-0f43adce9e9e
+connectorVersion: 1.4.12

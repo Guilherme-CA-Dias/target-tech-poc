@@ -1,0 +1,125 @@
+key: user-external-app-to-my-app
+id: 681a4e46333b04d6fb3c64f9
+name: 'User: External App => My App'
+isDeactivated: false
+universalFlowId: 681a4e36250875b571aa17d7
+integrationId: 681a4e2c5f4cb1dd06e1c6f2
+integration:
+  key: jira
+  state: READY
+  errors: []
+  isDeactivated: false
+  id: 681a4e2c5f4cb1dd06e1c6f2
+  name: Jira
+  uuid: dcfbf52a-0e90-4bd4-8d39-aa6f21aa3081
+  connectorId: 64343d08986ed1caad5b3aa7
+  hasDefaultParameters: false
+  hasMissingParameters: false
+  hasDocumentation: true
+  hasOperations: true
+  hasData: true
+  hasEvents: false
+  hasGlobalWebhooks: false
+  hasUdm: true
+  areParametersCustomized: false
+  baseUri: s3://integration-app-connectors/public/9c8c0930-c1fb-4678-ba3e-0f43adce9e9e
+  connectorVersion: 1.4.12
+  logoUri: https://static.integration.app/connectors/jira/logo.png
+  dataCollectionsCount: 12
+  operationsCount: 499
+  eventsCount: 0
+  authType: oauth2
+nodes:
+  user-created-trigger:
+    type: data-record-created-trigger
+    name: User Created Trigger
+    config:
+      dataSource:
+        key: users
+      fieldMapping: {}
+    links:
+      - key: get-all-fields-by-id
+  user-updated-trigger:
+    type: data-record-updated-trigger
+    name: User Updated Trigger
+    config:
+      dataSource:
+        key: users
+      fieldMapping: {}
+    links:
+      - key: get-all-fields-by-id3
+  user-deleted-trigger:
+    type: data-record-deleted-trigger
+    name: User Deleted Trigger
+    config:
+      dataSource:
+        key: tasks
+      fieldMapping: {}
+    links:
+      - key: delete-user-from-my-app
+  get-all-fields-by-id:
+    type: find-data-record-by-id
+    name: Get all fields by Id
+    config:
+      dataSource:
+        key: users
+      fieldMapping:
+        key: users
+        includeRawFields: true
+      id:
+        $var: $.input.user-created-trigger.record.id
+    links:
+      - key: create-user-in-my-app
+  create-user-in-my-app:
+    type: api-request-to-your-app
+    name: Create User in my App
+    config:
+      request:
+        body:
+          externalId:
+            $var: $.input.user-created-trigger.record.id
+          data:
+            $var: $.input.get-all-fields-by-id
+        uri: integration/webhooks/task-users
+        method: POST
+    links: []
+  get-all-fields-by-id3:
+    type: find-data-record-by-id
+    name: Get all fields by Id
+    config:
+      dataSource:
+        key: users
+      id: ''
+      fieldMapping:
+        key: users
+        includeRawFields: true
+    links:
+      - key: update-user-in-my-app
+  update-user-in-my-app:
+    type: api-request-to-your-app
+    name: Update User in my App
+    config:
+      request:
+        body:
+          externalId:
+            $var: $.input.user-updated-trigger.record.id
+          data:
+            $var: $.input.get-all-fields-by-id3
+        uri: /integration/webhooks/task-users
+        method: PATCH
+    links: []
+  delete-user-from-my-app:
+    type: api-request-to-your-app
+    name: Delete User from My App
+    config:
+      request:
+        body:
+          externalId:
+            $var: $.input.user-deleted-trigger.record.id
+        method: DELETE
+        uri: /integration/webhooks/task-users
+    links: []
+autoCreateInstances: true
+customized: false
+isDeployed: false
+integrationKey: jira

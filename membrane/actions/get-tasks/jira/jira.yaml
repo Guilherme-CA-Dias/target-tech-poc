@@ -1,0 +1,25 @@
+isCustomized: false
+parentId: 681a4e2ebe83e911c4bafc61
+integrationId: 681a4e2c5f4cb1dd06e1c6f2
+key: get-tasks
+state: READY
+errors: []
+isDeactivated: false
+id: 681a4e3c0d6a7236439b5d22
+name: Get Tasks
+type: list-data-records
+inputSchema:
+  type: object
+  properties:
+    cursor:
+      type: string
+config:
+  dataSource:
+    key: tasks
+  cursor:
+    $var: $.input.cursor
+  fieldMapping:
+    key: tasks
+    includeRawFields: true
+isDeployed: false
+integrationKey: jira

@@ -1,0 +1,95 @@
+key: project-external-app-to-my-app
+id: 681a4e34be83e911c4bafced
+name: 'Project: External App => My App'
+isDeactivated: false
+nodes:
+  project-created-trigger:
+    type: data-record-created-trigger
+    name: Project Created Trigger
+    config:
+      dataSource:
+        key: projects
+    links:
+      - key: get-all-fields-by-id2
+  update-project-in-my-app:
+    type: api-request-to-your-app
+    name: Update Project in my App
+    config:
+      request:
+        body:
+          externalId:
+            $var: $.input.get-all-fields-by-id.id
+          data:
+            $var: $.input.get-all-fields-by-id
+        uri: /integration/webhooks/projects
+        method: PATCH
+    links: []
+  project-deleted-trigger:
+    type: data-record-deleted-trigger
+    name: Project Deleted Trigger
+    config:
+      dataSource:
+        key: projects
+    links:
+      - key: delete-project-from-my-app
+  delete-project-from-my-app:
+    type: api-request-to-your-app
+    name: Delete Project from My App
+    config:
+      request:
+        body:
+          externalId:
+            $var: $.input.project-deleted-trigger.record.id
+        method: DELETE
+        uri: /integration/webhooks/projects
+    links: []
+  get-all-fields-by-id:
+    type: find-data-record-by-id
+    name: Get all fields by Id
+    config:
+      dataSource:
+        key: tasks
+      id:
+        $var: $.input.task-updated-trigger.record.id
+      fieldMapping:
+        key: tasks
+        includeRawFields: true
+    links:
+      - key: update-project-in-my-app
+  get-all-fields-by-id2:
+    type: find-data-record-by-id
+    name: Get all fields by Id
+    config:
+      dataSource:
+        key: tasks
+      fieldMapping:
+        key: tasks
+        includeRawFields: true
+      id:
+        $var: $.input.project-created-trigger.record.id
+    links:
+      - key: create-project-in-my-app
+  project-updated-trigger:
+    type: data-record-updated-trigger
+    name: Project Updated Trigger
+    config:
+      dataSource:
+        key: tasks
+    links:
+      - key: get-all-fields-by-id
+  create-project-in-my-app:
+    type: api-request-to-your-app
+    name: Create Project in my App
+    config:
+      request:
+        body:
+          externalId:
+            $var: $.input.project-created-trigger.record.id
+          data:
+            $var: $.input.get-all-fields-by-id2
+        uri: /integration/webhooks/projects
+        method: POST
+    links: []
+autoCreateInstances: true
+customized: false
+isDeployed: false

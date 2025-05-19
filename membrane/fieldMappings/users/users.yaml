@@ -1,0 +1,16 @@
+key: users
+state: READY
+errors: []
+isDeactivated: false
+id: 681a4e345f71e34a8035143b
+name: Users
+customized: false
+dataSourceKey: users
+direction: both
+defaultImportValue:
+  email:
+    $var: $.primaryEmail
+  id:
+    $var: $.id
+  fullName:
+    $var: $.fullName
